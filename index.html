@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シューティングゲーム</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: #222;
+            font-family: Arial, sans-serif;
+        }
+        #gameContainer {
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #fff;
+            background: #87CEEB;
+        }
+        #score {
+            color: #fff;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        #gameOver {
+            display: none;
+            color: #ff0000;
+            font-size: 32px;
+            margin-top: 20px;
+        }
+        #controls {
+            color: #fff;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="controls">
+            操作: ←→ - 左右移動, スペース - 撃つ
+        </div>
+        <div style="color: #fff; margin-top: 20px; text-align: center; max-width: 700px;">
+            <h3 style="color: #87CEEB; margin: 0 0 15px 0;">🎮 ゲーム説明</h3>
+            <p style="margin: 10px 0; font-size: 16px;">上から降ってくる敵を撃ち倒してスコアを稼ごう！</p>
+            
+            <div style="display: inline-block; margin: 15px 0;">
+                <h4 style="color: #ffff99; margin: 10px 0;">👾 敵の種類</h4>
+                <table style="margin: 0 auto; border-collapse: collapse; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                    <tr style="background: rgba(255,255,255,0.1);">
+                        <th style="padding: 8px 15px; border: 1px solid #666;">敵</th>
+                        <th style="padding: 8px 15px; border: 1px solid #666;">特徴</th>
+                        <th style="padding: 8px 15px; border: 1px solid #666;">スコア</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">▲ 通常敵</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">赤い三角形、直進</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">10pt</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">◆ 強い敵</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">大きなダイヤ、5-10HP</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">HP×100pt</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">🔸 テクニカル敵</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">回転、狙い撃ち</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">20pt</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div style="display: inline-block; margin: 15px 0;">
+                <h4 style="color: #ffff99; margin: 10px 0;">🎁 アイテム効果</h4>
+                <table style="margin: 0 auto; border-collapse: collapse; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                    <tr style="background: rgba(255,255,255,0.1);">
+                        <th style="padding: 8px 15px; border: 1px solid #666;">アイテム</th>
+                        <th style="padding: 8px 15px; border: 1px solid #666;">効果</th>
+                        <th style="padding: 8px 15px; border: 1px solid #666;">持続時間</th>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">🛡️ バリア</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">敵の攻撃を無効化</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">20秒</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">⏱️ タイムストップ</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">敵の動きを停止</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">10秒</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">🚀 ホーミング</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">弾が敵を追跡</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">20秒</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">❤ ライフ</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">ライフを1増加</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">永続</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">💣 爆弾</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">全ての敵と弾を消去</td>
+                        <td style="padding: 8px 15px; border: 1px solid #666;">即時</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <p style="margin: 15px 0; font-size: 14px; color: #ccc;">
+                💡 敵を倒すと10%の確率でアイテムドロップ<br>
+                💀 ライフが0になるとゲームオーバー
+            </p>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
